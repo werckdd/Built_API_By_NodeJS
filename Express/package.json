@@ -1,0 +1,12 @@
+{
+  "name": "Built_API_By_Express",
+  "version": "1.0.0",
+  "main": "server.js",
+  "author": "LamerialChan",
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.4",
+    "oauth": "^0.9.15"
+  }
+}

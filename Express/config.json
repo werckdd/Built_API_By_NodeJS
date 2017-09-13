@@ -1,11 +1,13 @@
 {
     "port": "8080",
-    "request_token_url": "https://api.twitter.com/oauth/request_token",
-    "access_token_url": "https://api.twitter.com/oauth/access_token",
-    "authorize_url": "https://twitter.com/oauth/authorize",
-    "consumer_key": "o5VGi3GvvVTM9ThNCnN8BneNP",
-    "consumer_secret": "Hx04BEZsLXIFXk7JoNAYbsQuZZS0Oseqf1r5PtY6Lds2mvOMfy",
-    "oauth_version": "1.0",
+    "base_url": "https://github.com/",
+    "authorize_url": "https://github.com/login/oauth/authorize",
+    "access_token_url": "https://github.com/login/oauth/access_token",
+    "user_info_url":"https://api.github.com/user",
+    "clientID": "a3922da9c5c68c9701f5",
+    "clientSecret": "f805e7991d162fb35c58d422dd9ed5f6a00333c4",
+    "scope":"user",
+    "oauth_version": "2.0",
     "oauth_signature": "HMAC-SHA1",
-    "oauth_callback": "http://3f267464.ngrok.io/request-token"
+    "oauth_callback": "http://65c3a572.ngrok.io/request-token"
 }

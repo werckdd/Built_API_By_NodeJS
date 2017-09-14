@@ -1,11 +1,18 @@
 var express = require('express')
 var url = require('url')
 var config = require('./config')
+var bodyParser = require('body-parser')
+var querystring = require('querystring')
+
 var authenticator = require('./GithubAuthenticator')
 var app = express()
 
-//利用cookie-parser读取cookie
+//利用cookie-parser读取cookie req.cookie
 app.use(require('cookie-parser')())
+//解析application/json,将结果封装到req.body
+app.use(bodyParser.json())
+// parse application/x-www-form-urlencoded ,extended:false使用第三方库querystring来解析
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/auth/github', authenticator.redirectToGithubLoginPage);
 
@@ -36,6 +43,11 @@ app.get(url.parse(config.oauth_callback).path, (req, res) => {
             res.sendStatus(401)
         }
     } )
+})
+
+//入口路径
+app.get('/', (req, res) => {
+    if(!req.cookie.)
 })
 
 

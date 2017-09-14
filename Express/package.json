@@ -5,9 +5,10 @@
   "author": "LamerialChan",
   "license": "MIT",
   "dependencies": {
+    "body-parser": "^1.18.1",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.4",
-    "node-fetch": "^1.7.3",
+    "mongoose": "^4.11.11",
     "oauth": "^0.9.15"
   }
 }

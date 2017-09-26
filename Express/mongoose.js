@@ -33,7 +33,7 @@ var DogSchema = mongoose.Schema({
         type: Number,
         min: 18,
         max: 65,
-        required: true, //必选验证器,指定在保存时，属性是否是必须的。
+        required: [true,"age是必填"], //必选验证器,指定在保存时，属性是否是必须的
         index: true //创建索引
     },
     mixed: mongoose.Schema.Types.Mixed, //任意schema类型
@@ -231,13 +231,13 @@ Model.remove({name: 'Anne Murray'}).exce(callback)
  * conditions: 就是query.通过query获取到指定doc
  * doc: 就是用来替换doc内容的值.
  * options: 这块需要说一些下.
- safe(boolean) 是否开启安全模式(default for true)
- upsert(boolean) 如果没有匹配到内容, 是否自动创建(default for false)
- multi(boolean) 如果有多个doc, 匹配到, 是否一起更改(default for false)
- strict(boolean) 使用严格模式(default for false)
- overwrite(boolean) 匹配到指定doc, 是否覆盖(default for false)
- runValidators(boolean): 表示是否用来启用验证.实际上, 你首先需要写一个验证(default for false)
- new（ 使用findOneAndUpdate时才有参数）： bool - 如果为true则返回修改后的文档而不是原始文件。 默认为false。
+        safe(boolean) 是否开启安全模式(default for true)
+        upsert(boolean) 如果没有匹配到内容, 是否自动创建(default for false)
+        multi(boolean) 如果有多个doc, 匹配到, 是否一起更改(default for false)
+        strict(boolean) 使用严格模式(default for false)
+        overwrite(boolean) 匹配到指定doc, 是否覆盖(default for false)
+        runValidators(boolean): 表示是否用来启用验证.实际上, 你首先需要写一个验证(default for false)
+        new（ 使用findOneAndUpdate时才有参数）： bool - 如果为true则返回修改后的文档而不是原始文件。 默认为false。
  */
 //$set是,用来指明更新的字段。
  Model.update({age: 18}, {$set: {name: 'jason borne'}}, {multi: true}, function (err, raw) {
@@ -252,48 +252,85 @@ Model.remove({name: 'Anne Murray'}).exce(callback)
   * Mongoose 触发 validation 同 a pre('save') 钩子一样。
   你能够手动触发 validation 通过doc.validate(callback) or doc.validateSync()。
   */
-  cat.save(function (error) {
-      //自动执行,validation
-  });
+//自定义validation
+new Schema({
+    phone: {
+        type: String,
+        validate: {
+            validator: function (data) {
+                return /\d{3}-\d{3}-\d{4}/.test(data);
+            },
+            message: '{VALUE} is not a valid phone number!' //VALUE代表phone存放的值
+        },
+        required: [true, 'User phone number required']
+    }
+})
 
-  //手动触发 validatio
-  //上面已经设置好user的字段内容.
-  user.validate(function (error) {
-  //error 就是验证不通过返回的错误信息
-  assert.equal(error.errors['phone'].message,
-      '555.0123 is not a valid phone number!');
-  })
+//还可以额外添加验证
+var toySchema = new Schema({
+    color: String,
+    name: String
+});
+var validator = function (value) {
+    return /blue|green|white|red|orange|periwinkle/i.test(value);
+};
+toySchema.path('color').validate(validator,
+    'Color `{VALUE}` not valid', 'Invalid color');
 
-//自定义验证器
-// 创建验证器
-function validator(val) {
-    return val == 'something';
+//设置完validation,还需要启用，实际上, 我们也可以把validation当做一个中间件使用
+//mongoose 提供了两种调用方式.
+//一种是内置调用, 当你使用.save方法时,他会首先执行一次存储方法.
+cat.save(function (error) {
+    //自动执行,validation
+});
+
+//另外一种是,手动验证–指定validate方法.
+//上面已经设置好user的字段内容.
+user.validate(function (error) {
+//error 就是验证不通过返回的错误信息
+    assert.equal(error.errors['phone'].message, '555.0123 is not a valid phone number!')
+})
+
+/**
+ * 在validate时, 错误的返回信息有以下4个字段: kind, path, value, and message;
+ * 1. kind: 用来表示验证设置的第二个参数.一般不用
+ * 2. path: 就是字段名
+ * 3. value: 你设置的错误内容
+ * 4. message: 提示错误信息
+ */
+//例子1
+phone: {
+    type: String,
+    validate: {
+        validator: function (data) {
+            return /\d{3}-\d{3}-\d{4}/.test(data);
+        },
+        message: '{VALUE} is not a valid phone number!', //VALUE代表phone存放的值
+        kind: "invalid phone"
+    }
 }
-new Schema({
-    name: {
-        type: String,
-        validate: validator
-    }
-});
+//例子2
+ var validator = function (value) {
+     return /blue|green|white|red|orange|periwinkle/i.test(value);
+ };
+ Toy.schema.path('color').validate(validator,
+     'Color `{VALUE}` not valid', 'Invalid color'); //设置了message && kind
+ var toy = new Toy({
+     color: 'grease'
+ });
+ toy.save(function (err) {
+     // err is our ValidationError object
+     // err.errors.color is a ValidatorError object
+     assert.equal(err.errors.color.message, 'Color `grease` not valid'); //返回message
+     assert.equal(err.errors.color.kind, 'Invalid color');
+     assert.equal(err.errors.color.path, 'color');
+     assert.equal(err.errors.color.value, 'grease');
+     assert.equal(err.name, 'ValidationError');
+     //访问color 也可以直接上 errors["color"]进行访问.
+ });
 
-// 附带自定义错误信息
-
-var custom = [validator, 'Uh oh, {PATH} does not equal "something".']
-new Schema({
-    name: {
-        type: String,
-        validate: custom
-    }
-});
-
-//添加多验证器
-var many = [{validator: validator,msg: 'uh oh'}, {
-    validator: anotherValidator,
-    msg: 'failed'
-}]
-new Schema({name: {type: String,validate: many}});
-
-// 直接通过SchemaType.validate方法定义验证器:
-var schema = new Schema({name: 'string'});
-schema.path('name').validate(validator, 'validation of `{PATH}` failed with value `{VALUE}`');
-
+ // 实际上, validate一般只会应用在save上, 如果你想在update使用的话, 需要启用runValidators
+ var opts = {runValidators: true};
+ Test.update({}, update, opts, function (error) { //额外开启runValidators的验证
+     // There will never be a validation error here
+ });

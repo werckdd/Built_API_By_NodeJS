@@ -2,13 +2,26 @@
   "name": "Built_API_By_Express",
   "version": "1.0.0",
   "main": "server.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node server.js"
+  },
   "author": "LamerialChan",
   "license": "MIT",
   "dependencies": {
+    "apollo-server-express": "^1.1.2",
     "body-parser": "^1.18.1",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.4",
+    "graphql": "^0.11.3",
+    "graphql-tools": "^1.2.2",
+    "ioredis": "^3.1.4",
     "mongoose": "^4.11.11",
     "oauth": "^0.9.15"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "nodemon": "^1.12.1"
   }
 }

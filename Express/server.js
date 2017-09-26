@@ -1,11 +1,13 @@
-var express = require('express')
-var url = require('url')
-var config = require('./config')
-var bodyParser = require('body-parser')
-var querystring = require('querystring')
+import express from 'express'
+import url from 'url'
+import bodyParser from 'body-parser'
+import querystring from 'querystring'
+import {graphiqlExpress,graphqlExpress} from 'apollo-server-express'
 
-var authenticator = require('./GithubAuthenticator')
-var app = express()
+import config from './config'
+import schema from './schema'
+import authenticator from './GithubAuthenticator'
+const app = express()
 
 //利用cookie-parser读取cookie req.cookie
 app.use(require('cookie-parser')())
@@ -13,6 +15,10 @@ app.use(require('cookie-parser')())
 app.use(bodyParser.json())
 // parse application/x-www-form-urlencoded ,extended:false使用第三方库querystring来解析
 app.use(bodyParser.urlencoded({ extended: false }))
+
+app.use('/graphql', graphqlExpress({ schema }))
+
+app.use("/graphiql",graphiqlExpress({endpointURL:"/graphql"}))
 
 app.get('/auth/github', authenticator.redirectToGithubLoginPage);
 
@@ -45,15 +51,8 @@ app.get(url.parse(config.oauth_callback).path, (req, res) => {
     } )
 })
 
-//入口路径
-app.get('/', (req, res) => {
-    if(!req.cookie.)
-})
-
-
 var server = app.listen(config.port, function () {
-    var host = server.address().address;
     var port = server.address().port;
 
-    console.log('Example app listening at http://%s:%s', host, port);
+    console.log('Example app listening at http://localhost:%s', port);
 });
